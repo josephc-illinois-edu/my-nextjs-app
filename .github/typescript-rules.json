@@ -1,0 +1,191 @@
+{
+  "rules": [
+    {
+      "id": "TS001",
+      "name": "preserve-and-enhance-comments",
+      "severity": "error",
+      "description": "Comments must be preserved and enhanced",
+      "requirements": [
+        "Preserve all existing comments when modifying code",
+        "Add or update comments to explain complex logic or business rules",
+        "Include JSDoc comments for all exported functions and types",
+        "Document type guards and type narrowing logic",
+        "Add inline comments for non-obvious implementations"
+      ],
+      "example": {
+        "good": [
+          "// Validates user input and ensures all required fields are present",
+          "// Returns true if valid, false otherwise",
+          "function validateUserInput(input: UserInput): boolean {",
+          "  // Check required fields first",
+          "  if (!input.name || !input.email) return false;",
+          "  return true;",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "TS002",
+      "name": "strict-typing",
+      "severity": "error",
+      "description": "Enforce strict typing across all TypeScript files",
+      "requirements": [
+        "Never use 'any' type in .ts or .tsx files",
+        "Create specific interfaces or types for all data structures",
+        "Use 'unknown' instead of 'any' for variables of uncertain type",
+        "Place shared types in dedicated type files under types/",
+        "Use inline types only for single-use cases"
+      ],
+      "example": {
+        "good": [
+          "interface UserData {",
+          "  id: string;",
+          "  name: string;",
+          "  email: string;",
+          "}",
+          "",
+          "function processUser(user: UserData): void {",
+          "  // Implementation",
+          "}"
+        ],
+        "bad": ["function processUser(user: any): void {", "  // Implementation", "}"]
+      }
+    },
+    {
+      "id": "TS003",
+      "name": "mandatory-type-guards",
+      "severity": "error",
+      "description": "Require type guards for all external or unknown data",
+      "requirements": [
+        "Create type guard functions for all external data validation",
+        "Use type predicates (is keyword) in guard functions",
+        "Never use type assertions without guards",
+        "Implement nested type guards for complex objects",
+        "Export common type guards for reuse"
+      ],
+      "example": {
+        "good": [
+          "function isUserResponse(value: unknown): value is UserResponse {",
+          "  return (",
+          "    typeof value === 'object' &&",
+          "    value !== null &&",
+          "    'id' in value &&",
+          "    'name' in value &&",
+          "    typeof value.id === 'string' &&",
+          "    typeof value.name === 'string'",
+          "  );",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "TS004",
+      "name": "error-handling",
+      "severity": "error",
+      "description": "Strict error handling requirements",
+      "requirements": [
+        "Use 'unknown' type for caught errors",
+        "Implement specific error type guards",
+        "Create custom error classes for different error types",
+        "Use discriminated unions for error handling",
+        "Document error handling behavior"
+      ],
+      "example": {
+        "good": [
+          "try {",
+          "  await apiCall();",
+          "} catch (error: unknown) {",
+          "  if (isApiError(error)) {",
+          "    handleApiError(error);",
+          "  } else if (error instanceof NetworkError) {",
+          "    handleNetworkError(error);",
+          "  } else {",
+          "    handleUnknownError(error);",
+          "  }",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "TS005",
+      "name": "module-standards",
+      "severity": "error",
+      "description": "Module and import/export standards",
+      "requirements": [
+        "Use ES modules exclusively (import/export)",
+        "No CommonJS syntax (require/module.exports)",
+        "Export types separately from values",
+        "Use named exports over default exports",
+        "Group imports by type (React, external, internal)"
+      ],
+      "example": {
+        "good": [
+          "import type { UserData } from './types';",
+          "import { useState, useEffect } from 'react';",
+          "import { processUser } from './utils';",
+          "",
+          "export interface User {",
+          "  id: string;",
+          "  name: string;",
+          "}",
+          "",
+          "export function useUser(): User {",
+          "  // Implementation",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "TS006",
+      "name": "type-annotations",
+      "severity": "error",
+      "description": "Explicit type annotations required",
+      "requirements": [
+        "Add explicit return types to all functions",
+        "Type all function parameters",
+        "Declare types for all variables where inference is not obvious",
+        "Use explicit generics where required",
+        "Document complex type relationships"
+      ],
+      "example": {
+        "good": [
+          "function processItems<T extends BaseItem>(items: T[]): ProcessedItem[] {",
+          "  const results: ProcessedItem[] = [];",
+          "  // Implementation",
+          "  return results;",
+          "}"
+        ]
+      }
+    }
+  ],
+  "enforcement": {
+    "tooling": [
+      {
+        "tool": "ESLint",
+        "rules": [
+          "@typescript-eslint/no-explicit-any",
+          "@typescript-eslint/explicit-function-return-type",
+          "@typescript-eslint/explicit-module-boundary-types"
+        ]
+      },
+      {
+        "tool": "TypeScript Compiler",
+        "options": {
+          "strict": true,
+          "noImplicitAny": true,
+          "strictNullChecks": true,
+          "strictFunctionTypes": true,
+          "strictBindCallApply": true,
+          "strictPropertyInitialization": true,
+          "noImplicitThis": true,
+          "useUnknownInCatchVariables": true
+        }
+      }
+    ],
+    "ci": [
+      "Run tsc --noEmit --strict on all TypeScript files",
+      "Run eslint with TypeScript rules",
+      "Enforce pre-commit hooks for type checking"
+    ]
+  }
+}
