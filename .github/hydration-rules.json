@@ -1,0 +1,174 @@
+{
+  "rules": [
+    {
+      "id": "HYDRATION001",
+      "name": "client-server-component-separation",
+      "severity": "error",
+      "description": "Enforce proper separation of client and server components",
+      "requirements": [
+        "Mark client components explicitly with 'use client' directive at the top of the file",
+        "Keep server components as the default (no directive needed)",
+        "Never mix server-side and client-side logic in the same component",
+        "Place client components in a /components/client directory",
+        "Place server components in a /components/server directory"
+      ],
+      "example": {
+        "good": [
+          "// /components/client/InteractiveButton.tsx",
+          "'use client';",
+          "export function InteractiveButton() {...}"
+        ],
+        "bad": [
+          "// Mixing server and client logic",
+          "'use client';",
+          "export async function ServerDataButton() {...}"
+        ]
+      }
+    },
+    {
+      "id": "HYDRATION002",
+      "name": "state-initialization",
+      "severity": "error",
+      "description": "Proper state initialization and mounting handling",
+      "requirements": [
+        "Use mounting checks for components that access browser APIs",
+        "Initialize state with undefined for values that come from browser APIs",
+        "Render placeholder content during server-side rendering",
+        "Use useEffect for browser API calls"
+      ],
+      "example": {
+        "good": [
+          "'use client';",
+          "function BrowserComponent() {",
+          "  const [mounted, setMounted] = useState(false);",
+          "  useEffect(() => setMounted(true), []);",
+          "  if (!mounted) return null;",
+          "  return <div>Browser content</div>;",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "HYDRATION003",
+      "name": "dynamic-data-handling",
+      "severity": "error",
+      "description": "Safe handling of dynamic data",
+      "requirements": [
+        "Avoid Date.now() or Math.random() in component render",
+        "Use stable IDs for dynamic content",
+        "Ensure consistent data between server and client render",
+        "Use useMemo for expensive computations"
+      ],
+      "example": {
+        "good": ["const id = useMemo(() => generateStableId(), [key])"],
+        "bad": ["const id = Math.random()"]
+      }
+    },
+    {
+      "id": "HYDRATION004",
+      "name": "layout-shift-prevention",
+      "severity": "error",
+      "description": "Prevent layout shifts during hydration",
+      "requirements": [
+        "Use suppressHydrationWarning only on non-critical content differences",
+        "Provide proper dimensions for dynamic content",
+        "Use skeleton loaders during initial load",
+        "Handle font loading with proper fallbacks"
+      ],
+      "example": {
+        "good": [
+          "function DynamicContent() {",
+          "  return (",
+          "    <div style={{ minHeight: '100px' }}>",
+          "      {mounted ? <Content /> : <Skeleton />}",
+          "    </div>",
+          "  );",
+          "}"
+        ]
+      }
+    },
+    {
+      "id": "HYDRATION005",
+      "name": "browser-api-safety",
+      "severity": "error",
+      "description": "Safe usage of browser APIs",
+      "requirements": [
+        "Check for window/document existence before usage",
+        "Use proper type guards for browser APIs",
+        "Handle SSR cases for browser-specific features",
+        "Use proper fallbacks for server-side rendering"
+      ],
+      "example": {
+        "good": [
+          "const isBrowser = typeof window !== 'undefined';",
+          "const width = isBrowser ? window.innerWidth : undefined;"
+        ]
+      }
+    }
+  ],
+  "implementation": {
+    "componentTemplate": {
+      "clientComponent": [
+        "'use client';",
+        "",
+        "import { useEffect, useState } from 'react';",
+        "",
+        "export function ClientComponent() {",
+        "  const [mounted, setMounted] = useState(false);",
+        "",
+        "  useEffect(() => {",
+        "    setMounted(true);",
+        "  }, []);",
+        "",
+        "  if (!mounted) {",
+        "    return null; // or return <Skeleton />;",
+        "  }",
+        "",
+        "  return <div>Client-side content</div>;",
+        "}"
+      ]
+    },
+    "providerTemplate": [
+      "'use client';",
+      "",
+      "export function Providers({ children }) {",
+      "  const [mounted, setMounted] = useState(false);",
+      "",
+      "  useEffect(() => {",
+      "    setMounted(true);",
+      "  }, []);",
+      "",
+      "  return (",
+      "    <ContextProvider>",
+      "      {mounted ? children : null}",
+      "    </ContextProvider>",
+      "  );",
+      "}"
+    ],
+    "layoutTemplate": [
+      "// No 'use client' - This is a server component",
+      "export default function RootLayout({ children }) {",
+      "  return (",
+      "    <html lang=\"en\" suppressHydrationWarning>",
+      "      <body>",
+      "        <Providers>{children}</Providers>",
+      "      </body>",
+      "    </html>",
+      "  );",
+      "}"
+    ]
+  },
+  "tooling": {
+    "eslintRules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "CallExpression[callee.name=/^(useState|useEffect)$/][arguments.length=0]",
+          "message": "React hooks must handle mounting state properly"
+        }
+      ]
+    }
+  }
+}

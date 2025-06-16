@@ -1,77 +1,100 @@
 'use client';
 
-import Image from 'next/image';
-import { Container, Title, Tabs } from '@mantine/core';
-import { DonorForm } from './components/DonorForm';
-import { useEffect } from 'react';
-import { db } from './lib/db';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Group,
+  Stack,
+  Paper,
+  ThemeIcon,
+  Grid,
+} from '@mantine/core';
+import { IconGift, IconHistory, IconSearch, IconFileExport } from '@tabler/icons-react';
+import Link from 'next/link';
+
+const features = [
+  {
+    icon: <IconGift size={24} />,
+    title: 'Process New Gifts',
+    description: 'Quickly process and record new donations with our streamlined transmittal form',
+  },
+  {
+    icon: <IconHistory size={24} />,
+    title: 'Track History',
+    description: 'Access complete history of transmitted gifts and their current status',
+  },
+  {
+    icon: <IconSearch size={24} />,
+    title: 'Search & Filter',
+    description: 'Easily find specific transmittals using advanced search and filtering options',
+  },
+  {
+    icon: <IconFileExport size={24} />,
+    title: 'Export Reports',
+    description: 'Generate and download detailed reports in multiple formats',
+  },
+];
 
 export default function Home() {
-  useEffect(() => {
-    // Initialize the database
-    db.open().catch((err) => {
-      console.error('Failed to open db:', err);
-    });
-  }, []);
-
   return (
-    <Container
-      size="lg"
-      py="xl"
-      className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
-    >
-      <Title order={1} mb="xl">
-        Donor Management System
-      </Title>
-      <Tabs defaultValue="donors">
-        <Tabs.List>
-          <Tabs.Tab value="donors">Add Donor</Tabs.Tab>
-          <Tabs.Tab value="donations">Donations</Tabs.Tab>
-          <Tabs.Tab value="reports">Reports</Tabs.Tab>
-        </Tabs.List>
+    <Container size="xl" py="xl">
+      <Stack gap="xl">
+        {/* Hero Section */}
+        <Stack ta="center" gap="md">
+          <Title order={1} size="h1">
+            Welcome to the Gift Transmittal System
+          </Title>
+          <Text size="lg" c="dimmed" maw={600} mx="auto">
+            Streamline your gift processing workflow with our modern and efficient transmittal
+            system.
+          </Text>
+          <Group justify="center" mt="md">
+            <Button
+              component={Link}
+              href="/new-transmittal"
+              size="lg"
+              variant="filled"
+              leftSection={<IconGift size={20} />}
+            >
+              New Transmittal
+            </Button>
+            <Button
+              component={Link}
+              href="/search"
+              size="lg"
+              variant="light"
+              leftSection={<IconSearch size={20} />}
+            >
+              Search Transmittals
+            </Button>
+          </Group>
+        </Stack>
 
-        <Tabs.Panel value="donors" pt="xl">
-          <DonorForm />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="donations" pt="xl">
-          <Title order={2}>Donations Coming Soon</Title>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="reports" pt="xl">
-          <Title order={2}>Reports Coming Soon</Title>
-        </Tabs.Panel>
-      </Tabs>
-
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {/* Features Section */}
+        <Paper withBorder p="xl" radius="md">
+          <Grid>
+            {features.map((feature, index) => (
+              <Grid.Col key={index} span={{ base: 12, sm: 6 }}>
+                <Group>
+                  <ThemeIcon size="xl" radius="md" variant="light">
+                    {feature.icon}
+                  </ThemeIcon>
+                  <Stack gap="xs">
+                    <Text fw={500} size="lg">
+                      {feature.title}
+                    </Text>
+                    <Text c="dimmed" size="sm">
+                      {feature.description}
+                    </Text>
+                  </Stack>
+                </Group>
+              </Grid.Col>
+            ))}
+          </Grid>
+        </Paper>
+      </Stack>
     </Container>
   );
 }
